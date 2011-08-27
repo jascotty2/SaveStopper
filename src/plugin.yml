@@ -1,5 +1,5 @@
 name: SaveStopper
-author: Robert 'Bobby' Zenz
+authors: [Robert 'Bobby' Zenz, jascotty2]
 
 main: org.bonsaimind.bukkitplugins.SaveStopper
-version: 0.7-j
+version: 0.8-j

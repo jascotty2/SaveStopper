@@ -23,6 +23,7 @@
  */
 package org.bonsaimind.bukkitplugins;
 
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -33,19 +34,25 @@ import org.bukkit.event.player.PlayerQuitEvent;
  */
 public class SaveStopperPlayerListener extends PlayerListener {
 
-	private SaveStopper parent = null;
+	private SaveStopperInterface saveStopper;
 
-	public SaveStopperPlayerListener(SaveStopper parentInstance) {
-		parent = parentInstance;
+	public SaveStopperPlayerListener(SaveStopperInterface parentInstance) {
+		saveStopper = parentInstance;
 	}
 
 	@Override
 	public void onPlayerLogin(PlayerLoginEvent event) {
-		parent.enable();
+		saveStopper.enable();
 	}
 
 	@Override
 	public void onPlayerQuit(PlayerQuitEvent event) {
-		parent.disable();
+		saveStopper.disable();
 	}
+	
+	@Override
+	public void onPlayerKick(PlayerKickEvent event) {
+		saveStopper.disable();
+	}
+
 }

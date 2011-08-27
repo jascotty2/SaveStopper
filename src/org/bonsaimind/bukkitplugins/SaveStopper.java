@@ -23,16 +23,17 @@
  */
 package org.bonsaimind.bukkitplugins;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import org.bukkit.Server;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
+import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+// for server loading wait
+import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.Server;
 
 /**
  * 
@@ -40,127 +41,70 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class SaveStopper extends JavaPlugin {
 
-    Server server = null;
-    private SSConsoleCommander serverCommander = null;
-    private boolean isSaving = true;
-    private Map<String, Object> config = null;
-    private Timer timer = new Timer(true);
-    private SaveStopperPlayerListener listener = new SaveStopperPlayerListener(this);
+	private SaveStopperPlayerListener listener;
+	private SaveStopperInterface saveStopper;
 
-    public void onDisable() {
-        timer.cancel();
-        timer = null;
+	public void onDisable() {
+		saveStopper.cancel();
+		saveStopper = null;
+		listener = null;
+	}
 
-        listener = null;
+	public void onEnable() {
+		saveStopper = new SaveStopperInterface(this);
+		saveStopper.loadConfig();
+		listener = new SaveStopperPlayerListener(saveStopper);
 
-        config.clear();
-        config = null;
+		PluginManager pm = getServer().getPluginManager();
+		pm.registerEvent(Type.PLAYER_LOGIN, listener, Priority.Monitor, this);
+		pm.registerEvent(Type.PLAYER_QUIT, listener, Priority.Monitor, this);
 
-        server = null;
-    }
+		PluginDescriptionFile pdfFile = this.getDescription();
+		System.out.println(pdfFile.getName() + " " + pdfFile.getVersion() + " is enabled.");
 
-    public void onEnable() {
-        server = getServer();
-        serverCommander = new SSConsoleCommander(server);
+		if (saveStopper.disableOnStart) {
+			//saveStopper.disableNow();
+			pm.registerEvent(Type.PLUGIN_ENABLE, new ServerLoadWait(this), Priority.Monitor, this);
+		}
+	}
 
-        PluginManager pm = server.getPluginManager();
-        pm.registerEvent(Type.PLAYER_LOGIN, listener, Priority.Low, this);
-        pm.registerEvent(Type.PLAYER_QUIT, listener, Priority.Low, this);
+	public SaveStopperInterface getSaveStopper() {
+		return saveStopper;
+	}
 
-        PluginDescriptionFile pdfFile = this.getDescription();
-        System.out.println(pdfFile.getName() + " " + pdfFile.getVersion() + " is enabled.");
+	private static class ServerLoadWait extends ServerListener {
 
-        readConfiguration();
+		Server sv;
+		SaveStopperInterface i;
+		int wait = 15;
+		Timer tm;
+		boolean isRun = false;
 
-        if ((Boolean) config.get("disableOnStart")) {
-            internalDisable();
-        }
-    }
+		public ServerLoadWait(SaveStopper plugin) {
+			sv = plugin.getServer();
+			i = plugin.getSaveStopper();
+			//wait = i.waitTime;
+		}
 
-    protected void readConfiguration() {
-        SaveStopperYamlHelper helper = new SaveStopperYamlHelper("plugins/SaveStopper/config.yml");
-        config = helper.read();
+		public void newWait() {
+			if (tm != null) {
+				tm.cancel();
+			}
+			tm = new Timer();
+			tm.schedule(new TimerTask() {
 
-        if (config == null) {
-            System.out.println("SaveStopper: No configuration file found, using defaults.");
-            config = new HashMap<String, Object>();
-        }
+				@Override
+				public void run() {
+					isRun = true;
+					i.disableNow();
+				}
+			}, wait * 1000);
+		}
 
-        // Set the defaults
-        if (!config.containsKey("disableOnStart")) {
-            config.put("disableOnStart", true);
-        }
-
-        if (!config.containsKey("saveAll")) {
-            config.put("saveAll", true);
-        }
-
-        if (!config.containsKey("wait")) {
-            config.put("wait", 300);
-        }
-        
-        if (!config.containsKey("verbose")) {
-            config.put("verbose", true);
-        }
-
-        if (!helper.exists()) {
-            System.out.println("SaveStopper: Configuration file doesn't exist, dumping now...");
-            helper.write(config);
-        }
-    }
-
-    /**
-     * Enable saving.
-     */
-    protected void enable() {
-        if (server.getOnlinePlayers().length == 0 && isSaving && (Boolean) config.get("verbose")) {
-            System.out.println("SaveStopper: Canceling scheduled disabling...");
-            timer.purge();
-        }
-
-        if (!isSaving) {
-            if((Boolean) config.get("verbose")) System.out.println("SaveStopper: Enabling saving...");
-            serverCommander.runCommand("save-on");
-            isSaving = true;
-        }
-    }
-
-    /**
-     * Disable saving, check if we should use the timer or not.
-     */
-    protected void disable() {
-        if (isSaving && server.getOnlinePlayers().length <= 1) {
-            long wait = ((Number) config.get("wait")).longValue();
-            if (wait > 0) {
-                if((Boolean) config.get("verbose")) System.out.println("SaveStopper: Scheduling disabling in " + Long.toString(wait) + " seconds...");
-
-                timer.schedule(new TimerTask() {
-
-                    @Override
-                    public void run() {
-                        internalDisable();
-                    }
-                }, wait * 1000);
-            } else {
-                internalDisable();
-            }
-        }
-    }
-
-    /**
-     * Disable saving.
-     */
-    private void internalDisable() {
-        if (isSaving && server.getOnlinePlayers().length == 0) {
-            if((Boolean) config.get("verbose")) System.out.println("SaveStopper: Disabling saving...");
-
-            if ((Boolean) config.get("saveAll")) {
-                serverCommander.runCommand("save-all");
-            }
-
-            serverCommander.runCommand("save-off");
-
-            isSaving = false;
-        }
-    }
+		@Override
+		public void onPluginEnable(PluginEnableEvent event) {
+			if(!isRun)
+			newWait();
+		}
+	}
 }

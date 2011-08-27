@@ -1,0 +1,57 @@
+changelog (jascotty2)
+
+0.7-j
+fix for bukkit 1.5_02 servers, and should be update-proof
+
+0.8-j
+re-wrote/organized stopping classes
+save on start is delayed, for bukkit 1060 compatiblity
+
+
+
+original post:
+
+SaveStopper - Stops saving if no one is online:
+Version: v0.7, build 670
+
+This plugin will stop the server from saving the world (via save-off/save-on) if no user is online.
+
+At the moment this only listens for the quit and login events of players. It will perform a simple check if the user was the last and, if yes, will issue a save-all and disable saving. On the next login of a user, it will re-enable it.
+
+Since my private server is without any casing (and will most likely stay that way) I could hear that my harddisks were in constant motion. After further investigation I found out that the minecraft server seems to write data to the disk every second even if no one is connected (most likely day/night cycle related, since everything else is pretty much dependant if a player is around or not). This is not a big issue, but I'm resting more peacefully knowing that my harddisks can rest also.
+
+From the technical side this has most likely no implication on the lifetime or performance of the harddisk. I wrote it purely to stop my harddisks from making noise if they don't have to. I hope somebody else will find it useful, too.
+
+Features:
+Delayed disabling after the last logout
+Disabling at startup
+Easy configuration
+
+
+Changelog:
+Version 0.7 (Download) [670]
+Fixed compatibility with 670
+Removed verbose-setting (despite the promise, it only showed status messages which are now showing everytime)
+Version 0.6 (Download) [493]
+Fixed incorrect message that the saving will be disabled (even when players were connected)
+Renamed classes to avoid collision with other plugins
+Updated CommandHelper to my modified version
+Version 0.5 (Download) [439]
+Fixed error if no configuration file exists
+Version 0.4 (Download) [439]
+Fixed TSLPC
+Fixed crash at startup
+Version 0.3 (Download)
+Implemented delayed disabling
+Added configuration file
+Version 0.2 (Download)
+Before turning off the save-function, a save-all will be issued
+Saving will be disabled at startup
+Version 0.1 (Download)
+First Version
+
+Planned Features:
+Improving my English, because it sucks...
+
+Known Bugs:
+Saving does not get disabled if the last player dies and exits to the menu
