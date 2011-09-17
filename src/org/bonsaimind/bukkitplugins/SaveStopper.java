@@ -44,12 +44,6 @@ public class SaveStopper extends JavaPlugin {
 	private SaveStopperPlayerListener listener;
 	private SaveStopperInterface saveStopper;
 
-	public void onDisable() {
-		saveStopper.cancel();
-		saveStopper = null;
-		listener = null;
-	}
-
 	public void onEnable() {
 		saveStopper = new SaveStopperInterface(this);
 		saveStopper.loadConfig();
@@ -66,6 +60,12 @@ public class SaveStopper extends JavaPlugin {
 			//saveStopper.disableNow();
 			pm.registerEvent(Type.PLUGIN_ENABLE, new ServerLoadWait(this), Priority.Monitor, this);
 		}
+	}
+
+	public void onDisable() {
+		saveStopper.cancel();
+		saveStopper = null;
+		listener = null;
 	}
 
 	public SaveStopperInterface getSaveStopper() {

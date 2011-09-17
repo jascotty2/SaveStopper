@@ -1,5 +1,9 @@
 changelog (jascotty2)
 
+0.8-j
+update for 1139 compatiblility
+- again, hopefully more update-proof
+
 0.7-j
 fix for bukkit 1.5_02 servers, and should be update-proof
 

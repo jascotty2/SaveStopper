@@ -22,53 +22,54 @@ import org.bukkit.plugin.Plugin;
  */
 public class SSConsoleCommander {
 
-    static Server serv = null;
-    static CraftServer cserv = null;
+	static Server serv = null;
+	static CraftServer cserv = null;
 
-    public SSConsoleCommander(Server sv) {
-        serv = sv;
+	public SSConsoleCommander(Server sv) {
+		serv = sv;
 
-        if (!(sv instanceof CraftServer)) {
-            System.err.println("CommandHelper: server is not a CraftServer...is the plugin broken?");
-            cserv = null;
-        } else {
-            cserv = (CraftServer) sv;
-        }
+		if (!(sv instanceof CraftServer)) {
+			System.err.println("CommandHelper: server is not a CraftServer...is the plugin broken?");
+			cserv = null;
+		} else {
+			cserv = (CraftServer) sv;
+		}
 
-    } // end default constructor
+	} // end default constructor
 
-    public void runCommand(String command) {
-        if (cserv == null) {
-            serv.dispatchCommand(new RunCommander(true), command);
-        } else {
-            //cserv.getServer().a(command);
-            cserv.getServer().consoleCommandHandler.handle(new ServerCommand(command, cserv.getServer()));//a(command);
-        }
-    }
+	public void runCommand(String command) {
+//		if (cserv == null) {
+			serv.dispatchCommand(new RunCommander(true), command);
+//		} else {
+//			//cserv.getServer().a(command);
+//			cserv.getServer().consoleCommandHandler.handle(
+//					new ServerCommand(command, cserv.getServer()));//a(command);
+//		}
+	}
 
-    public static class RunCommander implements CommandSender {
+	public static class RunCommander implements CommandSender {
 
-        boolean op = false;
+		boolean op = false;
 
-        public RunCommander(boolean asOp) {
-            op = asOp;
-        }
+		public RunCommander(boolean asOp) {
+			op = asOp;
+		}
 
-        public boolean isOp() {
-            return op;
-        }
+		public boolean isOp() {
+			return op;
+		}
 
 		public void setOp(boolean bln) {
 			op = bln;
 		}
-		
-        public Server getServer() {
-            return serv;
-        }
 
-        public void sendMessage(String string) {
-            //serv.getLogger().log(Level.INFO, string);
-        }
+		public Server getServer() {
+			return serv;
+		}
+
+		public void sendMessage(String string) {
+			//serv.getLogger().log(Level.INFO, string);
+		}
 
 		public boolean isPermissionSet(String string) {
 			return true;
@@ -87,19 +88,19 @@ public class SSConsoleCommander {
 		}
 
 		public PermissionAttachment addAttachment(Plugin plugin, String string, boolean bln) {
-		return null;
+			return null;
 		}
 
 		public PermissionAttachment addAttachment(Plugin plugin) {
-		return null;
+			return null;
 		}
 
 		public PermissionAttachment addAttachment(Plugin plugin, String string, boolean bln, int i) {
-		return null;
+			return null;
 		}
 
 		public PermissionAttachment addAttachment(Plugin plugin, int i) {
-		return null;
+			return null;
 		}
 
 		public void removeAttachment(PermissionAttachment pa) {
@@ -114,6 +115,9 @@ public class SSConsoleCommander {
 			return ret;
 		}
 
-    }
+		public String getName() {
+			return "Console";
+		}
+	}
 } // end class SSConsoleCommander
 
